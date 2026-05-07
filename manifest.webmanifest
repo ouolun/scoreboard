@@ -1,6 +1,6 @@
 {
-  "name": "Tennis Score",
-  "short_name": "Tennis Score",
+  "name": "ScoreBoard",
+  "short_name": "ScoreBoard",
   "start_url": ".",
   "scope": ".",
   "display": "standalone",
