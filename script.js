@@ -9,6 +9,10 @@ const matchSettings = {
 };
 
 let hasAnnouncedWinner = false;
+let lastScoringSide = null;
+let consecutiveScoreCount = 0;
+let serveSwitchTimerId = null;
+let activeServeSwitchPanel = null;
 
 function isIOSDevice() {
     return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
@@ -145,6 +149,54 @@ function animateNumber(numberEl, direction) {
     }, 180);
 }
 
+function clearServeSwitchIndicator() {
+    if (serveSwitchTimerId !== null) {
+        window.clearTimeout(serveSwitchTimerId);
+        serveSwitchTimerId = null;
+    }
+
+    if (activeServeSwitchPanel) {
+        const indicator = activeServeSwitchPanel.querySelector(".serve-switch-indicator");
+
+        if (indicator) {
+            indicator.style.opacity = "0";
+            indicator.style.animation = "none";
+        }
+
+        activeServeSwitchPanel.classList.remove("serve-switch-active");
+        activeServeSwitchPanel = null;
+    }
+}
+
+function showServeSwitchIndicator(panel) {
+    clearServeSwitchIndicator();
+
+    const indicator = panel.querySelector(".serve-switch-indicator");
+
+    panel.classList.add("serve-switch-active");
+    activeServeSwitchPanel = panel;
+
+    if (indicator) {
+        indicator.style.opacity = "1";
+        indicator.style.animation = "serve-switch-spin 900ms linear infinite";
+    }
+
+    serveSwitchTimerId = window.setTimeout(() => {
+        if (indicator) {
+            indicator.style.opacity = "0";
+            indicator.style.animation = "none";
+        }
+
+        panel.classList.remove("serve-switch-active");
+
+        if (activeServeSwitchPanel === panel) {
+            activeServeSwitchPanel = null;
+        }
+
+        serveSwitchTimerId = null;
+    }, 3000);
+}
+
 function setActivePanel(panel) {
     document.querySelectorAll(".score-panel").forEach((item) => {
         item.classList.toggle("invert", item === panel);
@@ -212,6 +264,10 @@ function resetScores() {
 
     document.body.classList.remove("court-swapped");
 
+    clearServeSwitchIndicator();
+    lastScoringSide = null;
+    consecutiveScoreCount = 0;
+
     hasAnnouncedWinner = false;
     saveState();
 }
@@ -227,6 +283,10 @@ function swapScores() {
     if (!leftNumber || !rightNumber || !leftPanel || !rightPanel || !leftTag || !rightTag) {
         return;
     }
+
+    clearServeSwitchIndicator();
+    lastScoringSide = null;
+    consecutiveScoreCount = 0;
 
     document.body.classList.toggle("court-swapped");
 
@@ -269,6 +329,26 @@ function updateScore(panel, numberEl, delta) {
 
     if (delta > 0) {
         setActivePanel(panel);
+
+        const scoringSide = panel.dataset.side || "";
+
+        if (lastScoringSide === scoringSide) {
+            consecutiveScoreCount += 1;
+        } else {
+            lastScoringSide = scoringSide;
+            consecutiveScoreCount = 1;
+        }
+
+        // --- 修改這裡的邏輯 ---
+        if (consecutiveScoreCount >= 2) {
+            // 不再將 consecutiveScoreCount 歸零，
+            // 這樣後續只要 lastScoringSide 不變，每次都會進來這裡
+            showServeSwitchIndicator(panel);
+        }
+        // ---------------------
+    } else {
+        lastScoringSide = null;
+        consecutiveScoreCount = 0;
     }
 
     checkWinner();

@@ -328,6 +328,7 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    position: relative;
     touch-action: pan-x pan-y;
     transition: background-color 240ms ease, transform 240ms ease;
 }
@@ -339,6 +340,7 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    position: relative;
     touch-action: pan-x pan-y;
     transition: background-color 240ms ease, transform 240ms ease;
 }
@@ -417,6 +419,39 @@ body {
     line-height: 1;
     user-select: none;
     transition: transform 180ms ease, opacity 180ms ease, color 240ms ease;
+}
+
+.serve-switch-indicator {
+    position: absolute;
+    inset: 50% auto auto 50%;
+    transform: translate(-50%, -50%) scale(0.85);
+    font-size: 60vh;
+    line-height: 1;
+    color: rgb(255, 255, 255);
+    opacity: 0;
+    pointer-events: none;
+    user-select: none;
+    transition: opacity 160ms ease;
+}
+
+.score-panel.serve-switch-active .left-number,
+.score-panel.serve-switch-active .right-number {
+    opacity: 0;
+}
+
+.score-panel.serve-switch-active .serve-switch-indicator {
+    opacity: 1;
+    animation: serve-switch-spin 900ms linear infinite;
+}
+
+@keyframes serve-switch-spin {
+    from {
+        transform: translate(-50%, -50%) scale(0.85) perspective(1000px) rotateY(0deg);
+    }
+
+    to {
+        transform: translate(-50%, -50%) scale(0.85) perspective(1000px) rotateY(360deg);
+    }
 }
 
 .bump-up {
