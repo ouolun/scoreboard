@@ -270,6 +270,7 @@ function resetScores() {
 
     hasAnnouncedWinner = false;
     saveState();
+    updateServeIndicators();
 }
 
 function swapScores() {
@@ -313,6 +314,7 @@ function swapScores() {
     }, 240);
 
     saveState();
+    updateServeIndicators();
 }
 
 function updateScore(panel, numberEl, delta) {
@@ -353,6 +355,7 @@ function updateScore(panel, numberEl, delta) {
 
     checkWinner();
     saveState();
+    updateServeIndicators();
 }
 
 function setupPanel(panel) {
@@ -582,8 +585,66 @@ function setupButtons(appVersion) {
     }
 }
 
+function setupServeIndicators() {
+    const styles = document.createElement("style");
+    styles.textContent = `
+        .serve-indicator {
+            position: fixed;
+            width: 72px;
+            height: 72px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 40px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1000;
+            pointer-events: none;
+        }
+        .serve-indicator.active {
+            opacity: 1;
+        }
+        #serve-indicator-left-top { top: 24px; left: 24px; }
+        #serve-indicator-left-bottom { bottom: 24px; left: 24px; }
+        #serve-indicator-right-top { top: 24px; right: 24px; }
+        #serve-indicator-right-bottom { bottom: 24px; right: 24px; }
+    `;
+    document.head.appendChild(styles);
+
+    const positions = ["left-top", "left-bottom", "right-top", "right-bottom"];
+    positions.forEach(pos => {
+        const el = document.createElement("div");
+        el.id = `serve-indicator-${pos}`;
+        el.className = "serve-indicator";
+        el.textContent = "🏸";
+        document.body.appendChild(el);
+    });
+}
+
+function updateServeIndicators() {
+    document.querySelectorAll(".serve-indicator").forEach(el => el.classList.remove("active"));
+
+    if (!lastScoringSide) return;
+
+    const { left, right } = getScores();
+
+    // 假設左半邊隊伍面向右：其右方選手在下方，左方選手在上方
+    // 假設右半邊隊伍面向左：其右方選手在上方，左方選手在下方
+    if (lastScoringSide === "left") {
+        const isEven = left % 2 === 0;
+        document.getElementById(isEven ? "serve-indicator-left-bottom" : "serve-indicator-left-top")?.classList.add("active");
+    } else if (lastScoringSide === "right") {
+        const isEven = right % 2 === 0;
+        document.getElementById(isEven ? "serve-indicator-right-top" : "serve-indicator-right-bottom")?.classList.add("active");
+    }
+}
+
 async function bootstrap() {
     const appVersion = await resolveAppVersion();
+    setupServeIndicators();
     document.querySelectorAll(".score-panel").forEach(setupPanel);
     setupButtons(appVersion);
     updateRotateOverlay();
