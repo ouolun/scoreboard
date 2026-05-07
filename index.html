@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tennis Score</title>
+    <meta name="theme-color" content="#696969">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200..1000&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="left score-panel" data-side="left" aria-label="Left score panel">
+            <div class="score-tag">HOST</div>
+            <div class="left-number">0</div>
+        </div>
+        <div class="right score-panel" data-side="right" aria-label="Right score panel">
+            <div class="score-tag">GUEST</div>
+            <div class="right-number">0</div>
+        </div>
+    </div>
+
+    <div class="button-bar">
+        <div class="menu-shell">
+            <button
+                class="action-btn menu-btn"
+                aria-label="Open menu"
+                aria-expanded="false"
+                aria-controls="action-menu"
+                id="menu-toggle"
+                type="button"
+            >
+                Menu
+            </button>
+            <div class="action-menu" id="action-menu" aria-hidden="true">
+                <button class="action-btn menu-item reset-btn" aria-label="Reset score" type="button">Reset</button>
+                <button class="action-btn menu-item settings-btn" aria-label="Open settings" type="button">Settings</button>
+                <button class="action-btn menu-item swap-btn" aria-label="Swap players" type="button">Swap</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="settings-modal" aria-hidden="true">
+        <div class="settings-backdrop" data-close="true"></div>
+        <div class="settings-panel" role="dialog" aria-modal="true" aria-label="Match settings">
+            <h2>Match Settings</h2>
+            <div class="settings-layout">
+                <section class="settings-column settings-column-main" aria-labelledby="winning-score-heading">
+                    <h3 id="winning-score-heading">Winning Score</h3>
+                    <div class="score-control" aria-label="Winning score controls">
+                        <button type="button" class="score-control-btn score-control-up" id="winning-score-up" aria-label="Increase winning score">+</button>
+                        <input id="winning-score" type="number" min="2" max="99" step="1" value="21" inputmode="numeric" aria-label="Winning score">
+                        <button type="button" class="score-control-btn score-control-down" id="winning-score-down" aria-label="Decrease winning score">-</button>
+                    </div>
+                    <p class="score-hint">You can use the buttons or type a value from 2 to 99.</p>
+                </section>
+
+                <section class="settings-column settings-column-side" aria-labelledby="other-settings-heading">
+                    <h3 id="other-settings-heading">Other Settings</h3>
+                    <div class="settings-list">
+                        <label class="toggle-card" for="enable-deuce">
+                            <span class="toggle-copy">
+                                <span class="toggle-title">Enable Deuce</span>
+                                <span class="toggle-description">Require a 2-point lead after reaching the target.</span>
+                            </span>
+                            <span class="toggle-switch">
+                                <input id="enable-deuce" type="checkbox" checked>
+                                <span class="toggle-track" aria-hidden="true"></span>
+                            </span>
+                        </label>
+                    </div>
+                </section>
+            </div>
+
+            <div class="actions settings-actions">
+                <button type="button" class="btn cancel" data-close="true">Cancel</button>
+                <button type="button" class="btn save" id="save-settings">Save</button>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
