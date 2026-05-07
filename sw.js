@@ -1,4 +1,5 @@
-const CACHE_NAME = "scoreboard-pwa-v3";
+const CACHE_VERSION = new URL(self.location).searchParams.get("v") || "dev";
+const CACHE_NAME = `scoreboard-pwa-${CACHE_VERSION}`;
 const APP_SHELL = [
   "./",
   "./index.html",

@@ -4,9 +4,10 @@
   "start_url": ".",
   "scope": ".",
   "display": "standalone",
+  "orientation": "landscape",
   "background_color": "#ffffff",
   "theme_color": "#696969",
-  "description": "A responsive tennis score tracker with swap and settings support.",
+  "description": "A responsive ScoreBoard app with swap and settings support.",
   "icons": [
     {
       "src": "icons/android-chrome-192x192.png",

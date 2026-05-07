@@ -1,6 +1,7 @@
 const MIN_SCORE = 0;
 const SWIPE_THRESHOLD = 30;
-const STORAGE_KEY = "tennis-score-pwa-state";
+const STORAGE_KEY = "scoreboard-state";
+const APP_ASSETS = ["index.html", "script.js", "style.css", "manifest.webmanifest", "sw.js"];
 
 const matchSettings = {
     winningScore: 21,
@@ -8,6 +9,42 @@ const matchSettings = {
 };
 
 let hasAnnouncedWinner = false;
+
+async function resolveAppVersion() {
+    try {
+        const responses = await Promise.all(
+            APP_ASSETS.map((asset) => fetch(asset, { method: "HEAD", cache: "no-store" }).catch(() => null))
+        );
+        const modifiedTimes = responses
+            .map((response) => {
+                if (!response) {
+                    return Number.NaN;
+                }
+
+                return Date.parse(response.headers.get("Last-Modified") || "");
+            })
+            .filter((time) => Number.isFinite(time));
+
+        if (modifiedTimes.length > 0) {
+            return new Date(Math.max(...modifiedTimes)).toISOString().slice(0, 10);
+        }
+    } catch {
+        // Fall back to the current date when file metadata is unavailable.
+    }
+
+    return new Date().toISOString().slice(0, 10);
+}
+
+function renderVersionBadge(version) {
+    const versionBadge = document.querySelector("#app-version");
+
+    if (!versionBadge) {
+        return;
+    }
+
+    versionBadge.textContent = `v${version}`;
+    versionBadge.title = `ScoreBoard version ${version}`;
+}
 
 function getDefaultState() {
     return {
@@ -254,7 +291,7 @@ function setupPanel(panel) {
     });
 }
 
-function setupButtons() {
+function setupButtons(appVersion) {
     const menuToggle = document.querySelector("#menu-toggle");
     const actionMenu = document.querySelector("#action-menu");
     const resetBtn = document.querySelector(".reset-btn");
@@ -430,12 +467,28 @@ function setupButtons() {
 
     if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
-            navigator.serviceWorker.register("sw.js").catch(() => {
+            navigator.serviceWorker.register(`sw.js?v=${encodeURIComponent(appVersion)}`).then((registration) => {
+                if (typeof registration.update === "function") {
+                    registration.update().catch(() => {
+                        // Ignore update check failures in restricted environments.
+                    });
+                }
+            }).catch(() => {
                 // Ignore registration failures in unsupported or file:// environments.
+            });
+
+            navigator.serviceWorker.addEventListener("controllerchange", () => {
+                window.location.reload();
             });
         });
     }
 }
 
-document.querySelectorAll(".score-panel").forEach(setupPanel);
-setupButtons();
+async function bootstrap() {
+    const appVersion = await resolveAppVersion();
+    renderVersionBadge(appVersion);
+    document.querySelectorAll(".score-panel").forEach(setupPanel);
+    setupButtons(appVersion);
+}
+
+bootstrap();

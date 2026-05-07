@@ -27,6 +27,22 @@ body {
     z-index: 30;
 }
 
+.version-badge {
+    position: fixed;
+    top: clamp(12px, 2vw, 20px);
+    left: clamp(12px, 2vw, 20px);
+    z-index: 40;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.72);
+    color: white;
+    font-family: Nunito, sans-serif;
+    font-size: clamp(12px, 1.6vw, 14px);
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    backdrop-filter: blur(8px);
+}
+
 .menu-shell {
     position: relative;
     display: flex;
@@ -97,6 +113,23 @@ body {
 .menu-item {
     width: clamp(84px, 14vw, 116px);
     height: clamp(84px, 14vw, 116px);
+}
+
+@media (max-width: 768px) {
+    .action-btn {
+        width: clamp(68px, 18vw, 92px);
+        height: clamp(68px, 18vw, 92px);
+        font-size: clamp(12px, 3vw, 15px);
+    }
+
+    .menu-item {
+        width: clamp(68px, 18vw, 92px);
+        height: clamp(68px, 18vw, 92px);
+    }
+
+    .button-bar {
+        bottom: clamp(10px, 2.5vw, 16px);
+    }
 }
 
 .settings-modal {
