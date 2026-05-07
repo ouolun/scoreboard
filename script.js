@@ -230,9 +230,9 @@ function checkWinner() {
         return;
     }
 
-    const winnerSide = left > right ? "Left" : "Right";
+    const winnerSide = left > right ? "left" : "right"; // 修正：確保只宣告一次，並使用小寫
     hasAnnouncedWinner = true;
-    window.alert(`${winnerSide} wins!`);
+    showWinnerOverlay(winnerSide, left, right); // 呼叫新的勝利覆蓋層函式
 }
 
 function resetScores() {
@@ -267,6 +267,7 @@ function resetScores() {
     clearServeSwitchIndicator();
     lastScoringSide = null;
     consecutiveScoreCount = 0;
+    hideWinnerOverlay(); // 修正：重置時隱藏勝利覆蓋層
 
     hasAnnouncedWinner = false;
     saveState();
@@ -642,9 +643,98 @@ function updateServeIndicators() {
     }
 }
 
+function setupWinnerOverlay() {
+    const styles = document.createElement("style");
+    styles.textContent = `
+        .winner-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: 1500; /* 勝利覆蓋層的 Z-index */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .winner-overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+        .winner-content {
+            text-align: center;
+        }
+        .winner-title {
+            font-size: 10vw;
+            font-weight: 900;
+            margin: 0 0 16px 0;
+            text-transform: uppercase;
+            line-height: 1.1;
+            letter-spacing: 0.1em; /* 增加字寬與間距，與主頁標籤呼應 */
+            font-family: 'Nunito', sans-serif;
+        }
+        .winner-score-text {
+            font-size: 15vh;
+            font-weight: 700;
+            margin: 0 0 40px 0;
+            font-family: 'Nunito', sans-serif;
+            background: rgba(0, 0, 0, 0.2); /* 加上微透黑色的背景來突顯膠囊形狀 */
+            border-radius: 9999px; /* 將圓角開到最大 */
+            padding: 0 60px; /* 增加兩側的內部留白 */
+            display: inline-block; /* 讓背景框只包覆在文字的寬度 */
+        }
+        @media (max-width: 768px) {
+            .winner-title { font-size: 15vw; }
+            .winner-score-text { font-size: 10vw; }
+        }
+        /* 確保原有的 Menu 按鈕列強制置於勝利畫面之上 */
+        .button-bar, .menu-shell {
+            z-index: 1600 !important; /* 確保選單 Z-index 高於勝利覆蓋層 */
+        }
+    `;
+    document.head.appendChild(styles);
+
+}
+
+function showWinnerOverlay(winnerSide, leftScore, rightScore) {
+    const overlay = document.getElementById("winner-overlay");
+    const title = document.getElementById("winner-title");
+    const scoreText = document.getElementById("winner-score-text");
+    
+    if (!overlay || !title || !scoreText) return;
+
+    const winningPanel = document.querySelector(`.${winnerSide}.score-panel`);
+    const winningTag = winningPanel ? winningPanel.querySelector(".score-tag").textContent : "WINNER";
+
+    title.textContent = `${winningTag} WIN`;
+    scoreText.textContent = `${leftScore} - ${rightScore}`;
+    
+    if (winningPanel) {
+        // 自動提取勝利方底色，如果提取失敗就用預設的半透明黑
+        const bgColor = window.getComputedStyle(winningPanel).backgroundColor;
+        overlay.style.backgroundColor = (bgColor && bgColor !== "rgba(0, 0, 0, 0)") ? bgColor : "rgba(0, 0, 0, 0.85)";
+    } else {
+        overlay.style.backgroundColor = "rgba(0, 0, 0, 0.85)";
+    }
+    
+    overlay.classList.add("open");
+    overlay.setAttribute("aria-hidden", "false");
+}
+
+function hideWinnerOverlay() {
+    const overlay = document.getElementById("winner-overlay");
+    if (overlay) {
+        overlay.classList.remove("open");
+        overlay.setAttribute("aria-hidden", "true");
+    }
+}
+
 async function bootstrap() {
     const appVersion = await resolveAppVersion();
     setupServeIndicators();
+    setupWinnerOverlay(); // 修正：在 bootstrap 時呼叫 setupWinnerOverlay
     document.querySelectorAll(".score-panel").forEach(setupPanel);
     setupButtons(appVersion);
     updateRotateOverlay();
