@@ -10,6 +10,10 @@ const matchSettings = {
 
 let hasAnnouncedWinner = false;
 
+function isIOSDevice() {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+}
+
 async function resolveAppVersion() {
     try {
         const responses = await Promise.all(
@@ -35,15 +39,29 @@ async function resolveAppVersion() {
     return new Date().toISOString().slice(0, 10);
 }
 
-function renderVersionBadge(version) {
-    const versionBadge = document.querySelector("#app-version");
+function updateRotateOverlay() {
+    const rotateOverlay = document.querySelector("#rotate-overlay");
 
-    if (!versionBadge) {
+    if (!rotateOverlay) {
         return;
     }
 
-    versionBadge.textContent = `v${version}`;
-    versionBadge.title = `ScoreBoard version ${version}`;
+    const shouldShow = isIOSDevice() && window.matchMedia("(orientation: portrait)").matches;
+
+    rotateOverlay.classList.toggle("open", shouldShow);
+    rotateOverlay.setAttribute("aria-hidden", String(!shouldShow));
+}
+
+async function attemptLandscapeLock() {
+    if (!screen.orientation || typeof screen.orientation.lock !== "function") {
+        return;
+    }
+
+    try {
+        await screen.orientation.lock("landscape");
+    } catch {
+        // iOS and some browsers require a user gesture or do not support orientation locking.
+    }
 }
 
 function getDefaultState() {
@@ -486,9 +504,14 @@ function setupButtons(appVersion) {
 
 async function bootstrap() {
     const appVersion = await resolveAppVersion();
-    renderVersionBadge(appVersion);
     document.querySelectorAll(".score-panel").forEach(setupPanel);
     setupButtons(appVersion);
+    updateRotateOverlay();
+
+    window.addEventListener("resize", updateRotateOverlay);
+    window.addEventListener("orientationchange", updateRotateOverlay);
+    window.addEventListener("pointerdown", attemptLandscapeLock, { once: true });
+    window.addEventListener("load", attemptLandscapeLock, { once: true });
 }
 
 bootstrap();

@@ -2,9 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1, user-scalable=no">
     <title>ScoreBoard</title>
     <meta name="theme-color" content="#696969">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png">
@@ -27,8 +29,6 @@
         </div>
     </div>
 
-    <div class="version-badge" id="app-version" aria-label="ScoreBoard version">v...</div>
-
     <div class="button-bar">
         <div class="menu-shell">
             <button
@@ -46,6 +46,13 @@
                 <button class="action-btn menu-item settings-btn" aria-label="Open settings" type="button">Settings</button>
                 <button class="action-btn menu-item swap-btn" aria-label="Swap players" type="button">Swap</button>
             </div>
+        </div>
+    </div>
+
+    <div class="rotate-overlay" id="rotate-overlay" aria-hidden="true">
+        <div class="rotate-card">
+            <div class="rotate-title">請將裝置轉為橫向</div>
+            <div class="rotate-copy">ScoreBoard 會在橫向模式下顯示。</div>
         </div>
     </div>
 
